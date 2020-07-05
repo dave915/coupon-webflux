@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Coupon {
+public class Coupon extends AuditLog {
     public static final String COUPON_EXPIRED_MESSAGE = "유효기간이 지난 쿠폰입니다.";
 
     @Id

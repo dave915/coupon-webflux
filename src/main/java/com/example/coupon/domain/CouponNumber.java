@@ -6,9 +6,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 
 @Getter
-@EqualsAndHashCode(of = {"number"})
+@EqualsAndHashCode(of = {"number"}, callSuper = false)
 @NoArgsConstructor
-public class CouponNumber {
+public class CouponNumber extends AuditLog {
     @Id
     private long id;
     private String number;
