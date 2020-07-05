@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,7 +60,7 @@ public class CouponService {
     private Mono<Coupon> validateCouponExpired(long couponId) {
         return fromCallable(() -> couponRepository.findById(couponId)
                 .orElseThrow(() -> new IllegalArgumentException(COUPON_NOT_FOUND_MESSAGE)))
-                .doOnNext(Coupon::validExpired);
+                .doOnNext(coupon -> coupon.validExpired(LocalDateTime.now()));
     }
 
     public Mono<List<CouponNumber>> getUserCoupons(long userId) {

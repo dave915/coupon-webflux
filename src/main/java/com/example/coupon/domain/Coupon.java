@@ -23,8 +23,7 @@ public class Coupon extends AuditLog {
         this.expireDateTime = expiredTime;
     }
 
-    public void validExpired() {
-        LocalDateTime now = LocalDateTime.now();
+    public void validExpired(LocalDateTime now) {
         if (now.isAfter(expireDateTime)) {
             throw new IllegalArgumentException(COUPON_EXPIRED_MESSAGE);
         }
