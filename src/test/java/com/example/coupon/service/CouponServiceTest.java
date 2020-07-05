@@ -32,6 +32,7 @@ public class CouponServiceTest {
     private Coupon plusDayMockCoupon;
     private Coupon minusDayMockCoupon;
     private CouponNumber mockCouponNumber;
+    private CouponNumber mockUsedCouponNumber;
 
     @Mock
     private CouponRepository couponRepository;
@@ -48,6 +49,9 @@ public class CouponServiceTest {
         this.plusDayMockCoupon = new Coupon(couponId, 1000, LocalDateTime.now().plusDays(3));
         this.minusDayMockCoupon = new Coupon(couponId, 1000, LocalDateTime.now().minusDays(3));
         this.mockCouponNumber = new CouponNumber(number, couponId);
+        this.mockUsedCouponNumber = new CouponNumber(number, couponId);
+        mockUsedCouponNumber.issue(userId);
+        mockUsedCouponNumber.useCoupon(userId);
     }
 
     @Test
@@ -213,6 +217,50 @@ public class CouponServiceTest {
         given(couponRepository.findById(couponId)).willReturn(Optional.of(plusDayMockCoupon));
 
         assertThatThrownBy(() -> couponService.useCoupon(number, 0).block())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(CouponNumber.USER_NOT_MATCH_MESSAGE);
+    }
+
+    @Test
+    @DisplayName("사용자 쿠폰을 취소한다")
+    void cancelCouponTest() {
+        given(couponNumberRepository.findById(any())).willReturn(Optional.of(mockUsedCouponNumber));
+        given(couponNumberRepository.save(any())).willReturn(mockCouponNumber);
+
+        CouponNumber couponNumber = couponService.cancelCoupon(number, userId).block();
+
+        assertThat(couponNumber).isNotNull();
+        assertThat(couponNumber.isUse()).isFalse();
+    }
+
+    @Test
+    @DisplayName("사용자 쿠폰을 취소시 존재하는 쿠폰번호가 아닐 경우 오류가 발생한다")
+    void cancelCoupon_notFoundCouponNumberTest() {
+        given(couponNumberRepository.findById(any())).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> couponService.cancelCoupon(number, userId).block())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(CouponService.COUPON_NUMBER_NOT_FOUND_MESSAGE);
+    }
+
+    @Test
+    @DisplayName("사용자 쿠폰을 취소시 이미 사용한 쿠폰 일 경우 오류가 발생한다")
+    void cancelCoupon_usedCouponNumberTest() {
+        given(couponNumberRepository.findById(any())).willReturn(Optional.of(mockUsedCouponNumber));
+        given(couponNumberRepository.save(any())).willReturn(mockCouponNumber);
+
+        couponService.cancelCoupon(number, userId).block();
+        assertThatThrownBy(() -> couponService.cancelCoupon(number, userId).block())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(CouponNumber.IS_UN_USED_COUPON_MESSAGE);
+    }
+
+    @Test
+    @DisplayName("사용자 쿠폰을 취소시 발급 받은 사용자가 아닐 경우 오류가 발생한다")
+    void cancelCoupon_notMatchUserUseTest() {
+        given(couponNumberRepository.findById(any())).willReturn(Optional.of(mockUsedCouponNumber));
+
+        assertThatThrownBy(() -> couponService.cancelCoupon(number, 0).block())
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(CouponNumber.USER_NOT_MATCH_MESSAGE);
     }

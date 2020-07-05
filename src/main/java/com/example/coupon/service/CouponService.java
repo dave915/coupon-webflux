@@ -75,6 +75,15 @@ public class CouponService {
                 .doOnNext(coupon -> coupon.validExpired(LocalDateTime.now()));
     }
 
+    public Mono<CouponNumber> cancelCoupon(String couponNumberId, long userId) {
+        return fromCallable(() -> couponNumberRepository.findById(couponNumberId)
+                .orElseThrow(() -> new IllegalArgumentException(COUPON_NUMBER_NOT_FOUND_MESSAGE)))
+                .flatMap(couponNumber -> {
+                    couponNumber.cancelCoupon(userId);
+                    return fromCallable(() -> couponNumberRepository.save(couponNumber));
+                });
+    }
+
     public Mono<List<CouponNumber>> getUserCoupons(long userId) {
         return fromCallable(() -> couponNumberRepository.findAllByUserId(userId));
     }

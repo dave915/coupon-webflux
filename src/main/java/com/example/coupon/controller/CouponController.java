@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -46,5 +47,10 @@ public class CouponController {
     @PutMapping("/{couponNumberId}")
     public Mono<CouponNumber> useCoupon(@PathVariable String couponNumberId, @RequestParam long userId) {
         return couponService.useCoupon(couponNumberId, userId);
+    }
+
+    @DeleteMapping("/{couponNumberId}")
+    public Mono<CouponNumber> cancelCoupon(@PathVariable String couponNumberId, @RequestParam long userId) {
+        return couponService.cancelCoupon(couponNumberId, userId);
     }
 }

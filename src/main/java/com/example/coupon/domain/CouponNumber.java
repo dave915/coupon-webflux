@@ -10,7 +10,8 @@ import org.springframework.data.annotation.Id;
 @NoArgsConstructor
 public class CouponNumber extends AuditLog {
     public static final String IS_USED_COUPON_MESSAGE = "이미 사용된 쿠폰 입니다.";
-    public static final String USER_NOT_MATCH_MESSAGE = "발급받은 사용자가 아닙니다.";
+    public static final String IS_UN_USED_COUPON_MESSAGE = "사용 되지 않은 쿠폰 입니다.";
+    public static final String USER_NOT_MATCH_MESSAGE = "발급 받은 사용자가 아닙니다.";
 
     @Id
     private long id;
@@ -38,6 +39,14 @@ public class CouponNumber extends AuditLog {
             throw new IllegalArgumentException(IS_USED_COUPON_MESSAGE);
         }
         this.use = true;
+    }
+
+    public void cancelCoupon(long userId) {
+        checkUserId(userId);
+        if (!use) {
+            throw new IllegalArgumentException(IS_UN_USED_COUPON_MESSAGE);
+        }
+        this.use = false;
     }
 
     private void checkUserId(long userId) {
