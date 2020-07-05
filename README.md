@@ -7,6 +7,7 @@ Java8, SpringBoot, Webflux, Gradle, Swagger
 ./gradlew build
 java -jar build/libs/coupon-0.0.1-SNAPSHOT.jar
 ```
+Swagger : http://localhost:8080/swagger-ui.html#/
 ## 기능 정의
 1. 랜덤한 코드의 쿠폰을 N개 생성하여 데이터베이스에 보관하는 API를 구현하세요.
     - 쿠폰-쿠폰번호 (1:N) 형태로 구현
