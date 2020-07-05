@@ -8,12 +8,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,6 +27,7 @@ public class CouponService {
     public static final String COUPON_NOT_FOUND_MESSAGE = "존재 하지 않는 쿠폰 입니다.";
     public static final String NOTFOUND_ISSUE_ABLE_COUPON_NUMBER_MESSAGE = "발급 할 쿠폰이 없습니다.";
     public static final String COUPON_NUMBER_NOT_FOUND_MESSAGE = "존재 하지 않는 쿠폰 번호 입니다.";
+    public static final String CAN_NOT_EXPIRE_NOTICE_BEFORE_DATE = "이미 만료된 쿠폰은 만료 공지를 할 수 없습니다.";
     private final CouponRepository couponRepository;
     private final CouponNumberRepository couponNumberRepository;
 
@@ -97,5 +96,27 @@ public class CouponService {
     private Mono<List<CouponNumber>> getExpiredCouponNumbers(List<Coupon> coupons) {
         Coupons expiredCoupons = new Coupons(coupons);
         return fromCallable(() -> couponNumberRepository.findAllByCouponIdInAndUserIdNotNull(expiredCoupons.ids()));
+    }
+
+    public Mono<Void> noticeExpiredCouponNumberBetweenDate(LocalDateTime start, LocalDateTime end) {
+        LocalDate startDate = start.toLocalDate();
+        LocalDate today = LocalDate.now();
+        if (startDate.isBefore(today)) {
+            throw new IllegalArgumentException(CAN_NOT_EXPIRE_NOTICE_BEFORE_DATE);
+        }
+
+        int distance = startDate.until(today).getDays();
+        return getExpiredCouponNumbersBetweenDate(start, end)
+                .doOnNext(couponNumbers -> noticeExpiredToUser(couponNumbers, distance))
+                .then();
+    }
+
+    private void noticeExpiredToUser(List<CouponNumber> allUserCouponNumbers, int distance) {
+        allUserCouponNumbers.stream()
+                .collect(Collectors.groupingBy(CouponNumber::getUserId,
+                        Collectors.collectingAndThen(Collectors.toList(), CouponNumbers::new)))
+                .forEach((userId, couponNumbers) ->
+                        log.info("쿠폰이 {}일 후 만료 됩니다. userId >>> {}, couponNumbers >>> {}", distance, userId, couponNumbers.distinctNumbers())
+                );
     }
 }

@@ -273,18 +273,44 @@ public class CouponServiceTest {
     void getExpiredCouponNumbersBetweenDate() {
         LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
         LocalDateTime end = LocalDateTime.now();
-        Coupon coupon = new Coupon(1L, price, LocalDateTime.now().plusHours(1));
-        List<CouponNumber> couponNumbers = Arrays.asList(new CouponNumber("11", coupon.getId()), new CouponNumber("22", coupon.getId()));
-        couponNumbers.forEach(couponNumber -> couponNumber.issue(userId));
-        given(couponRepository.findAllByExpireDateTimeBetween(start, end))
-                .willReturn(Collections.singletonList(coupon));
-        given(couponNumberRepository.findAllByCouponIdInAndUserIdNotNull(any()))
-                .willReturn(couponNumbers);
+        List<CouponNumber> couponNumbers = setExpireCouponNumbers(start, end);
 
         List<CouponNumber> expireCouponNumbers = couponService.getExpiredCouponNumbersBetweenDate(start, end).block();
 
         assertThat(expireCouponNumbers).isNotNull();
         assertThat(expireCouponNumbers).hasSize(couponNumbers.size());
         expireCouponNumbers.forEach(couponNumber -> assertThat(couponNumber.getUserId()).isNotNull());
+    }
+
+    @Test
+    @DisplayName("지정한 날짜에 만료 예정인 쿠폰 사용자에게 공지한다")
+    void noticeExpiredCouponNumberBetweenDate() {
+        LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        LocalDateTime end = LocalDateTime.now();
+        setExpireCouponNumbers(start, end);
+
+        couponService.noticeExpiredCouponNumberBetweenDate(start, end).block();
+    }
+
+    @Test
+    @DisplayName("지난 날짜의 만료된 쿠폰 사용자에게 공지 할 경우 오류 발생")
+    void noticeExpiredCouponNumberBetweenDate_beforDate() {
+        LocalDateTime start = LocalDateTime.of(LocalDate.now().minusDays(1), LocalTime.MIN);
+        LocalDateTime end = LocalDateTime.now().minusDays(1);
+
+        assertThatThrownBy(() -> couponService.noticeExpiredCouponNumberBetweenDate(start, end).block())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(CouponService.CAN_NOT_EXPIRE_NOTICE_BEFORE_DATE);
+    }
+
+    private List<CouponNumber> setExpireCouponNumbers(LocalDateTime start, LocalDateTime end) {
+        Coupon coupon = new Coupon(1L, price, LocalDateTime.now().minusHours(1));
+        List<CouponNumber> couponNumbers = Arrays.asList(new CouponNumber("11", coupon.getId()), new CouponNumber("22", coupon.getId()));
+        couponNumbers.forEach(couponNumber -> couponNumber.issue(userId));
+        given(couponRepository.findAllByExpireDateTimeBetween(start, end))
+                .willReturn(Collections.singletonList(coupon));
+        given(couponNumberRepository.findAllByCouponIdInAndUserIdNotNull(any()))
+                .willReturn(couponNumbers);
+        return couponNumbers;
     }
 }

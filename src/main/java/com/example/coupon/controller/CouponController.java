@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Validated
@@ -62,5 +63,14 @@ public class CouponController {
         LocalDateTime end = LocalDateTime.now();
 
         return couponService.getExpiredCouponNumbersBetweenDate(start, end);
+    }
+
+    @GetMapping("/expired/notice")
+    public Mono<Void> noticeExpiredCouponNumberBetweenDate(@RequestParam LocalDate noticeDate) {
+        LocalDate date = Objects.nonNull(noticeDate) ? noticeDate : LocalDate.now().plusDays(3);
+        LocalDateTime start = LocalDateTime.of(date, LocalTime.MIN);
+        LocalDateTime end = LocalDateTime.of(date, LocalTime.MAX);
+
+        return couponService.noticeExpiredCouponNumberBetweenDate(start, end);
     }
 }
