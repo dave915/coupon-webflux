@@ -27,6 +27,7 @@ import static com.example.coupon.utils.NIOUtils.fromCallable;
 public class CouponService {
     public static final String COUPON_NOT_FOUND_MESSAGE = "존재 하지 않는 쿠폰 입니다.";
     public static final String NOTFOUND_ISSUE_ABLE_COUPON_NUMBER_MESSAGE = "발급 할 쿠폰이 없습니다.";
+    public static final String COUPON_NUMBER_NOT_FOUND_MESSAGE = "존재 하지 않는 쿠폰 번호 입니다.";
     private final CouponRepository couponRepository;
     private final CouponNumberRepository couponNumberRepository;
 
@@ -55,6 +56,17 @@ public class CouponService {
             it.issue(userId);
             return fromCallable(() -> couponNumberRepository.save(it));
         }).orElseThrow(() -> new IllegalArgumentException(NOTFOUND_ISSUE_ABLE_COUPON_NUMBER_MESSAGE));
+    }
+
+    public Mono<CouponNumber> useCoupon(String couponNumberId, long userId) {
+        return fromCallable(() -> couponNumberRepository.findById(couponNumberId)
+                .orElseThrow(() -> new IllegalArgumentException(COUPON_NUMBER_NOT_FOUND_MESSAGE)))
+                .flatMap(couponNumber -> validateCouponExpired(couponNumber.getCouponId())
+                        .then(Mono.just(couponNumber))
+                ).flatMap(couponNumber -> {
+                    couponNumber.useCoupon(userId);
+                    return fromCallable(() -> couponNumberRepository.save(couponNumber));
+                });
     }
 
     private Mono<Coupon> validateCouponExpired(long couponId) {

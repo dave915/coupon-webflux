@@ -42,4 +42,9 @@ public class CouponController {
     public Mono<List<CouponNumber>> getUserCoupons(@PathVariable long userId) {
         return couponService.getUserCoupons(userId);
     }
+
+    @PutMapping("/{couponNumberId}")
+    public Mono<CouponNumber> useCoupon(@PathVariable String couponNumberId, @RequestParam long userId) {
+        return couponService.useCoupon(couponNumberId, userId);
+    }
 }
