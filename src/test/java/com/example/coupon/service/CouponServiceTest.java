@@ -73,7 +73,7 @@ public class CouponServiceTest {
 
     @Test
     @DisplayName("쿠폰 번호 생성 시 만료 된 쿠폰일 경우 오류가 발생 한다")
-    void generateCouponNumberExpiredCouponTest() {
+    void generateCouponNumber_ExpiredCouponTest() {
         int count = 2;
         long couponId = 1;
         given(couponRepository.findById(any())).willReturn(Optional.of(new Coupon(couponId, 1000, LocalDateTime.now().minusDays(1))));
@@ -85,7 +85,7 @@ public class CouponServiceTest {
 
     @Test
     @DisplayName("쿠폰 번호 생성 시 쿠폰 아이디를 찾을 수 없는 경우 오류가 발생 한다")
-    void generateCouponNumberNotFoundCouponTest() {
+    void generateCouponNumber_NotFoundCouponTest() {
         int count = 2;
         long couponId = 1;
         given(couponRepository.findById(any())).willReturn(Optional.empty());
@@ -93,5 +93,51 @@ public class CouponServiceTest {
         assertThatThrownBy(() -> couponService.generateCouponNumbers(couponId, count).block())
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(CouponService.COUPON_NOT_FOUND_MESSAGE);
+    }
+
+    @Test
+    @DisplayName("사용자에게 쿠폰을 지급한다")
+    void issueCouponTest() {
+        long userId = 1;
+        long couponId = 1;
+        String number = "11";
+        CouponNumber mockCouponNumber = new CouponNumber(number, couponId);
+        given(couponRepository.findById(any()))
+                .willReturn(Optional.of(new Coupon(couponId, 1000, LocalDateTime.now().plusDays(3))));
+        given(couponNumberRepository.findFirstByCouponIdAndUserIdNull(couponId))
+                .willReturn(Optional.of(mockCouponNumber));
+        given(couponNumberRepository.save(any())).willReturn(mockCouponNumber);
+
+        CouponNumber couponNumber = couponService.issueCoupon(couponId, userId).block();
+
+        assertThat(couponNumber).isNotNull();
+        assertThat(couponNumber.isUsersCouponNumber(userId)).isTrue();
+    }
+
+    @Test
+    @DisplayName("사용자에게 쿠폰 지급 시 만료 된 쿠폰 일 경우 오류가 발생 한다")
+    void issueCoupon_ExpiredCouponTest() {
+        long userId = 1;
+        long couponId = 1;
+        given(couponRepository.findById(any())).willReturn(Optional.of(new Coupon(couponId, 1000, LocalDateTime.now().minusDays(1))));
+
+        assertThatThrownBy(() -> couponService.issueCoupon(couponId, userId).block())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(Coupon.COUPON_EXPIRED_MESSAGE);
+    }
+
+    @Test
+    @DisplayName("사용자에게 쿠폰 지급 시 발급 가능한 번호가 없을 경우 오류가 발생 한다")
+    void issueCoupon_NotFoundIssueAbleNumberTest() {
+        long userId = 1;
+        long couponId = 1;
+        given(couponRepository.findById(any()))
+                .willReturn(Optional.of(new Coupon(couponId, 1000, LocalDateTime.now().plusDays(3))));
+        given(couponNumberRepository.findFirstByCouponIdAndUserIdNull(couponId))
+                .willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> couponService.issueCoupon(couponId, userId).block())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(CouponService.NOTFOUND_ISSUE_ABLE_COUPON_NUMBER_MESSAGE);
     }
 }

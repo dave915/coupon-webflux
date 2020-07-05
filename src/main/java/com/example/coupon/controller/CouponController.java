@@ -32,4 +32,9 @@ public class CouponController {
                                                          @RequestParam @Min(1) int count) {
         return couponService.generateCouponNumbers(couponId, count);
     }
+
+    @PutMapping("/{couponId}/issue")
+    public Mono<CouponNumber> issueCoupon(@PathVariable long couponId, @RequestParam long userId) {
+        return couponService.issueCoupon(couponId, userId);
+    }
 }
