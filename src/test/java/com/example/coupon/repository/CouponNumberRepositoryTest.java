@@ -1,6 +1,7 @@
 package com.example.coupon.repository;
 
 import com.example.coupon.domain.CouponNumber;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -22,8 +24,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJdbcTest
 @ExtendWith(SpringExtension.class)
 public class CouponNumberRepositoryTest {
+    long userId;
+
     @Autowired
     private CouponNumberRepository couponNumberRepository;
+
+    @BeforeEach
+    void setUp() {
+        this.userId = 3;
+    }
 
     @Test
     @DisplayName("Batch insert를 테스트 한다.")
@@ -70,18 +79,42 @@ public class CouponNumberRepositoryTest {
     @Test
     @DisplayName("유저의 쿠폰 번호들을 조회한다.")
     void findAllByUserIdTest() {
-        long userId = 3;
-        List<CouponNumber> couponNumbers = Arrays.asList(
-                new CouponNumber("11", 1),
-                new CouponNumber("22", 1),
-                new CouponNumber("33", 1)
-        );
-        IntStream.range(1, couponNumbers.size())
-                .forEach(i -> couponNumbers.get(i).issue(userId));
+        List<CouponNumber> couponNumbers = getIssuedCouponNumbers(1);
 
         couponNumberRepository.saveAll(couponNumbers);
         List<CouponNumber> usersCouponNumber = couponNumberRepository.findAllByUserId(userId);
 
         assertThat(usersCouponNumber).hasSize(couponNumbers.size() - 1);
+    }
+
+    @Test
+    void findAllByCouponIdInAndUserIdNotNullTest() {
+        List<CouponNumber> issuedCouponNumbers = getIssuedCouponNumbers(0);
+        List<CouponNumber> unIssuedCouponNumbers = Arrays.asList(
+                new CouponNumber("11", 1),
+                new CouponNumber("22", 2),
+                new CouponNumber("33", 3)
+        );
+        List<CouponNumber> testCouponNumbers = new ArrayList<>();
+        testCouponNumbers.addAll(issuedCouponNumbers);
+        testCouponNumbers.addAll(unIssuedCouponNumbers);
+        List<Long> searchCouponIds = Arrays.asList(1L, 2L);
+
+        couponNumberRepository.saveAll(testCouponNumbers);
+        List<CouponNumber> couponNumbers = couponNumberRepository.findAllByCouponIdInAndUserIdNotNull(searchCouponIds);
+
+        assertThat(couponNumbers).hasSize(2);
+        couponNumbers.forEach(couponNumber -> assertThat(couponNumber.getUserId()).isEqualTo(userId));
+    }
+
+    private List<CouponNumber> getIssuedCouponNumbers(int startIndex) {
+        List<CouponNumber> couponNumbers = Arrays.asList(
+                new CouponNumber("11", 1),
+                new CouponNumber("22", 2),
+                new CouponNumber("33", 3)
+        );
+        IntStream.range(startIndex, couponNumbers.size())
+                .forEach(i -> couponNumbers.get(i).issue(userId));
+        return couponNumbers;
     }
 }

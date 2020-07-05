@@ -12,7 +12,9 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import java.security.Principal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Slf4j
@@ -52,5 +54,13 @@ public class CouponController {
     @DeleteMapping("/{couponNumberId}")
     public Mono<CouponNumber> cancelCoupon(@PathVariable String couponNumberId, @RequestParam long userId) {
         return couponService.cancelCoupon(couponNumberId, userId);
+    }
+
+    @GetMapping("/expired/today")
+    public Mono<List<CouponNumber>> getTodayExpiredCouponNumbers() {
+        LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        LocalDateTime end = LocalDateTime.now();
+
+        return couponService.getExpiredCouponNumbersBetweenDate(start, end);
     }
 }

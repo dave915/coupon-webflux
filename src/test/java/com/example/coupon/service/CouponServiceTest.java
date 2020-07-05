@@ -12,8 +12,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -263,5 +266,25 @@ public class CouponServiceTest {
         assertThatThrownBy(() -> couponService.cancelCoupon(number, 0).block())
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(CouponNumber.USER_NOT_MATCH_MESSAGE);
+    }
+
+    @Test
+    @DisplayName("기간내 만료 예정인 발급된 쿠폰번호를 조회한다")
+    void getExpiredCouponNumbersBetweenDate() {
+        LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        LocalDateTime end = LocalDateTime.now();
+        Coupon coupon = new Coupon(1L, price, LocalDateTime.now().plusHours(1));
+        List<CouponNumber> couponNumbers = Arrays.asList(new CouponNumber("11", coupon.getId()), new CouponNumber("22", coupon.getId()));
+        couponNumbers.forEach(couponNumber -> couponNumber.issue(userId));
+        given(couponRepository.findAllByExpireDateTimeBetween(start, end))
+                .willReturn(Collections.singletonList(coupon));
+        given(couponNumberRepository.findAllByCouponIdInAndUserIdNotNull(any()))
+                .willReturn(couponNumbers);
+
+        List<CouponNumber> expireCouponNumbers = couponService.getExpiredCouponNumbersBetweenDate(start, end).block();
+
+        assertThat(expireCouponNumbers).isNotNull();
+        assertThat(expireCouponNumbers).hasSize(couponNumbers.size());
+        expireCouponNumbers.forEach(couponNumber -> assertThat(couponNumber.getUserId()).isNotNull());
     }
 }

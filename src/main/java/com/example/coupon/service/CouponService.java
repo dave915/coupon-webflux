@@ -1,9 +1,6 @@
 package com.example.coupon.service;
 
-import com.example.coupon.domain.Coupon;
-import com.example.coupon.domain.CouponNumber;
-import com.example.coupon.domain.CouponNumberGenerator;
-import com.example.coupon.domain.CouponNumbers;
+import com.example.coupon.domain.*;
 import com.example.coupon.repository.CouponNumberRepository;
 import com.example.coupon.repository.CouponRepository;
 import com.example.coupon.utils.IterableUtils;
@@ -11,11 +8,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.example.coupon.utils.NIOUtils.fromCallable;
 
@@ -86,5 +87,15 @@ public class CouponService {
 
     public Mono<List<CouponNumber>> getUserCoupons(long userId) {
         return fromCallable(() -> couponNumberRepository.findAllByUserId(userId));
+    }
+
+    public Mono<List<CouponNumber>> getExpiredCouponNumbersBetweenDate(LocalDateTime start, LocalDateTime end) {
+        return fromCallable(() -> couponRepository.findAllByExpireDateTimeBetween(start, end))
+                .flatMap(this::getExpiredCouponNumbers);
+    }
+
+    private Mono<List<CouponNumber>> getExpiredCouponNumbers(List<Coupon> coupons) {
+        Coupons expiredCoupons = new Coupons(coupons);
+        return fromCallable(() -> couponNumberRepository.findAllByCouponIdInAndUserIdNotNull(expiredCoupons.ids()));
     }
 }

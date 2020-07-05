@@ -10,4 +10,6 @@ public interface CouponNumberRepository extends CrudRepository<CouponNumber, Str
     Optional<CouponNumber> findFirstByCouponIdAndUserIdNull(long couponId);
 
     List<CouponNumber> findAllByUserId(long userId);
+
+    List<CouponNumber> findAllByCouponIdInAndUserIdNotNull(List<Long> couponIds);
 }
