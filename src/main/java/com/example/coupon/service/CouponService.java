@@ -61,4 +61,8 @@ public class CouponService {
                 .orElseThrow(() -> new IllegalArgumentException(COUPON_NOT_FOUND_MESSAGE)))
                 .doOnNext(Coupon::validExpired);
     }
+
+    public Mono<List<CouponNumber>> getUserCoupons(long userId) {
+        return fromCallable(() -> couponNumberRepository.findAllByUserId(userId));
+    }
 }

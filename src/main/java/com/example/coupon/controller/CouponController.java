@@ -37,4 +37,9 @@ public class CouponController {
     public Mono<CouponNumber> issueCoupon(@PathVariable long couponId, @RequestParam long userId) {
         return couponService.issueCoupon(couponId, userId);
     }
+
+    @GetMapping("/users/{userId}")
+    public Mono<List<CouponNumber>> getUserCoupons(@PathVariable long userId) {
+        return couponService.getUserCoupons(userId);
+    }
 }

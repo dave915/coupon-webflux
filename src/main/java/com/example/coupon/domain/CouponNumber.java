@@ -12,8 +12,8 @@ public class CouponNumber extends AuditLog {
     @Id
     private long id;
     private String number;
-    private long couponId;
-    private long userId;
+    private Long couponId;
+    private Long userId;
     private boolean use;
 
     public CouponNumber(String number, long couponId) {

@@ -140,4 +140,20 @@ public class CouponServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(CouponService.NOTFOUND_ISSUE_ABLE_COUPON_NUMBER_MESSAGE);
     }
+
+    @Test
+    @DisplayName("사용자 ID로 쿠폰번호 목록을 가져온다")
+    void name() {
+        long userId = 1;
+        long couponId = 1;
+        List<CouponNumber> mockCouponNumbers = Arrays.asList(
+                new CouponNumber("11", couponId),
+                new CouponNumber("22", couponId)
+        );
+        given(couponNumberRepository.findAllByUserId(userId)).willReturn(mockCouponNumbers);
+
+        List<CouponNumber> couponNumbers = couponService.getUserCoupons(userId).block();
+
+        assertThat(couponNumbers).hasSize(mockCouponNumbers.size());
+    }
 }
