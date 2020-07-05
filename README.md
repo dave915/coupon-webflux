@@ -1,11 +1,8 @@
 # coupon-webflux
 ## 사용 기술
-Java8, SpringBoot, Webflux, Mysql, Gradle, Swagger
+Java8, SpringBoot, Webflux, Gradle, Swagger
 ## 실행 방법
 ```shell
-# mogodb run
-docker run -p 27017:27017 --name mongo_boot -d mongo
-
 # application run 
 ./gradlew build
 java -jar build/libs/coupon-0.0.1-SNAPSHOT.jar
