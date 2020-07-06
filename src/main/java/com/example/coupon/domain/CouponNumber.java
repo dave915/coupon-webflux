@@ -18,9 +18,9 @@ public class CouponNumber extends AuditLog {
     private String number;
     private Long couponId;
     private Long userId;
-    private boolean use;
+    private boolean useFlag;
 
-    public CouponNumber(String number, long couponId) {
+    public CouponNumber(String number, Long couponId) {
         this.number = number;
         this.couponId = couponId;
     }
@@ -35,18 +35,18 @@ public class CouponNumber extends AuditLog {
 
     public void useCoupon(long userId) {
         checkUserId(userId);
-        if (use) {
+        if (useFlag) {
             throw new IllegalArgumentException(IS_USED_COUPON_MESSAGE);
         }
-        this.use = true;
+        this.useFlag = true;
     }
 
     public void cancelCoupon(long userId) {
         checkUserId(userId);
-        if (!use) {
+        if (!useFlag) {
             throw new IllegalArgumentException(IS_UN_USED_COUPON_MESSAGE);
         }
-        this.use = false;
+        this.useFlag = false;
     }
 
     private void checkUserId(long userId) {

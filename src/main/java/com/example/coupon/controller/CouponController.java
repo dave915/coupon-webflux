@@ -4,10 +4,15 @@ import com.example.coupon.controller.dto.CouponRequest;
 import com.example.coupon.domain.Coupon;
 import com.example.coupon.domain.CouponNumber;
 import com.example.coupon.service.CouponService;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
@@ -72,5 +77,13 @@ public class CouponController {
         LocalDateTime end = LocalDateTime.of(date, LocalTime.MAX);
 
         return couponService.noticeExpiredCouponNumberBetweenDate(start, end);
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(dataType = "__file", name = "files", required = true, paramType = "form")
+    })
+    @PostMapping(value = "/csv-import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+    public Mono<Void> upload(@RequestPart("files") Flux<FilePart> filePartFlux) {
+        return couponService.csvUpload(filePartFlux);
     }
 }

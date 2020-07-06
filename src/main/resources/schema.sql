@@ -14,7 +14,7 @@ create table if not exists COUPON_NUMBER
     number varchar(50) not null,
     coupon_id int not null,
     user_id int,
-    use bit,
+    use_flag bit,
     created_at datetime,
     updated_at datetime,
     primary key(id)

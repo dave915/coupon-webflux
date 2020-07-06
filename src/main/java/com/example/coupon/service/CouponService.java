@@ -3,11 +3,16 @@ package com.example.coupon.service;
 import com.example.coupon.domain.*;
 import com.example.coupon.repository.CouponNumberRepository;
 import com.example.coupon.repository.CouponRepository;
+import com.example.coupon.utils.FileUtils;
 import com.example.coupon.utils.IterableUtils;
+import com.example.coupon.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -16,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.example.coupon.utils.FunctionWithException.wrapper;
 import static com.example.coupon.utils.NIOUtils.fromCallable;
 
 
@@ -28,6 +34,8 @@ public class CouponService {
     public static final String NOTFOUND_ISSUE_ABLE_COUPON_NUMBER_MESSAGE = "발급 할 쿠폰이 없습니다.";
     public static final String COUPON_NUMBER_NOT_FOUND_MESSAGE = "존재 하지 않는 쿠폰 번호 입니다.";
     public static final String CAN_NOT_EXPIRE_NOTICE_BEFORE_DATE = "이미 만료된 쿠폰은 만료 공지를 할 수 없습니다.";
+    public static final int CSV_UPLOAD_BATCH_SIZE = 100;
+
     private final CouponRepository couponRepository;
     private final CouponNumberRepository couponNumberRepository;
 
@@ -118,5 +126,19 @@ public class CouponService {
                 .forEach((userId, couponNumbers) ->
                         log.info("쿠폰이 {}일 후 만료 됩니다. userId >>> {}, couponNumbers >>> {}", distance, userId, couponNumbers.distinctNumbers())
                 );
+    }
+
+    public Mono<Void> csvUpload(Flux<FilePart> filePartFlux) {
+        return FileUtils.readFilePartFlux(filePartFlux, CSV_UPLOAD_BATCH_SIZE, (fields, strings) -> {
+            if (CollectionUtils.isEmpty(strings)) {
+                return Mono.empty();
+            }
+
+            List<CouponNumber> couponNumbers = strings.stream()
+                    .map(wrapper(string -> ObjectUtils.csvRowToObject(string, fields, CouponNumber.class)))
+                    .collect(Collectors.toList());
+            return fromCallable(() -> couponNumberRepository.saveAll(couponNumbers))
+                    .doOnNext(it -> couponNumbers.clear());
+        });
     }
 }

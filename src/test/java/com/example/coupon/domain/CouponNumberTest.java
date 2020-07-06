@@ -15,9 +15,9 @@ public class CouponNumberTest {
     @BeforeEach
     void setUp() {
         this.userId = 1;
-        this.couponNumber = new CouponNumber("11", 1);
+        this.couponNumber = new CouponNumber("11", 1L);
         this.couponNumber.issue(this.userId);
-        this.usedCouponNumber = new CouponNumber("11", 1);
+        this.usedCouponNumber = new CouponNumber("11", 1L);
         this.usedCouponNumber.issue(this.userId);
         this.usedCouponNumber.useCoupon(userId);
     }
@@ -27,7 +27,7 @@ public class CouponNumberTest {
     void useCouponTest() {
         couponNumber.useCoupon(userId);
 
-        assertThat(couponNumber.isUse()).isTrue();
+        assertThat(couponNumber.isUseFlag()).isTrue();
     }
 
     @Test
@@ -53,7 +53,7 @@ public class CouponNumberTest {
     void cancelCouponTest() {
         usedCouponNumber.cancelCoupon(userId);
 
-        assertThat(usedCouponNumber.isUse()).isFalse();
+        assertThat(usedCouponNumber.isUseFlag()).isFalse();
     }
 
     @Test
