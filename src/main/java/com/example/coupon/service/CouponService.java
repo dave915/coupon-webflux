@@ -8,7 +8,6 @@ import com.example.coupon.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
-import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +36,7 @@ public class CouponService {
 
     private final CouponRepository couponRepository;
     private final CouponNumberRepository couponNumberRepository;
-    private final ReactiveMongoTemplate reactiveMongoTemplate;
+//    private final ReactiveMongoTemplate reactiveMongoTemplate;
 
     public Mono<Coupon> createCoupon(Coupon coupon) {
         return couponRepository.save(coupon);
@@ -54,19 +53,19 @@ public class CouponService {
                 .collectList();
     }
 
-    public Mono<CouponNumber> issueCoupon(String couponId, long userId) {
+    public Mono<CouponNumber> issueCoupon(String couponId, String userId) {
         return validateCouponExpired(couponId)
                 .flatMap(coupon -> couponNumberRepository.findFirstByCouponIdAndUserIdNull(coupon.getId()))
                 .switchIfEmpty(Mono.error(() -> new IllegalArgumentException(NOTFOUND_ISSUE_ABLE_COUPON_NUMBER_MESSAGE)))
                 .flatMap(couponNumber -> issueToUser(couponNumber, userId));
     }
 
-    private Mono<CouponNumber> issueToUser(CouponNumber couponNumber, long userId) {
+    private Mono<CouponNumber> issueToUser(CouponNumber couponNumber, String userId) {
         couponNumber.issue(userId);
         return couponNumberRepository.save(couponNumber);
     }
 
-    public Mono<CouponNumber> useCoupon(String couponNumberId, long userId) {
+    public Mono<CouponNumber> useCoupon(String couponNumberId, String userId) {
         return couponNumberRepository.findById(couponNumberId)
                 .switchIfEmpty(Mono.error(() -> new IllegalArgumentException(COUPON_NUMBER_NOT_FOUND_MESSAGE)))
                 .flatMap(couponNumber -> validateCouponExpired(couponNumber.getCouponId())
@@ -83,7 +82,7 @@ public class CouponService {
                 .doOnNext(coupon -> coupon.validExpired(LocalDateTime.now()));
     }
 
-    public Mono<CouponNumber> cancelCoupon(String couponNumberId, long userId) {
+    public Mono<CouponNumber> cancelCoupon(String couponNumberId, String userId) {
         return couponNumberRepository.findById(couponNumberId)
                 .switchIfEmpty(Mono.error(() -> new IllegalArgumentException(COUPON_NUMBER_NOT_FOUND_MESSAGE)))
                 .flatMap(couponNumber -> {
@@ -92,7 +91,7 @@ public class CouponService {
                 });
     }
 
-    public Mono<List<CouponNumber>> getUserCoupons(long userId) {
+    public Mono<List<CouponNumber>> getUserCoupons(String userId) {
         return couponNumberRepository.findAllByUserId(userId)
                 .collectList();
     }

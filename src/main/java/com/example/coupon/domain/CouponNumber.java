@@ -18,7 +18,7 @@ public class CouponNumber extends AuditLog {
     @MongoId
     private String number;
     private String couponId;
-    private Long userId;
+    private String userId;
     private boolean useFlag;
 
     public CouponNumber(String number, String couponId) {
@@ -26,15 +26,15 @@ public class CouponNumber extends AuditLog {
         this.couponId = couponId;
     }
 
-    public void issue(long userId) {
+    public void issue(String userId) {
         this.userId = userId;
     }
 
-    public boolean isUsersCouponNumber(long userId) {
-        return this.userId == userId;
+    public boolean isUsersCouponNumber(String userId) {
+        return this.userId.equals(userId);
     }
 
-    public void useCoupon(long userId) {
+    public void useCoupon(String userId) {
         checkUserId(userId);
         if (useFlag) {
             throw new IllegalArgumentException(IS_USED_COUPON_MESSAGE);
@@ -42,7 +42,7 @@ public class CouponNumber extends AuditLog {
         this.useFlag = true;
     }
 
-    public void cancelCoupon(long userId) {
+    public void cancelCoupon(String userId) {
         checkUserId(userId);
         if (!useFlag) {
             throw new IllegalArgumentException(IS_UN_USED_COUPON_MESSAGE);
@@ -50,7 +50,7 @@ public class CouponNumber extends AuditLog {
         this.useFlag = false;
     }
 
-    private void checkUserId(long userId) {
+    private void checkUserId(String userId) {
         if (!isUsersCouponNumber(userId)) {
             throw new IllegalArgumentException(USER_NOT_MATCH_MESSAGE);
         }

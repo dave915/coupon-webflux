@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface CouponNumberRepository extends ReactiveMongoRepository<CouponNumber, String> {
     Mono<CouponNumber> findFirstByCouponIdAndUserIdNull(String couponId);
 
-    Flux<CouponNumber> findAllByUserId(long userId);
+    Flux<CouponNumber> findAllByUserId(String userId);
 
     Flux<CouponNumber> findAllByCouponIdInAndUserIdNotNull(List<String> couponIds);
 }

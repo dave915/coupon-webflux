@@ -24,14 +24,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataMongoTest
 @ExtendWith(SpringExtension.class)
 public class CouponNumberRepositoryTest {
-    long userId;
+    private String userId;
 
     @Autowired
     private CouponNumberRepository couponNumberRepository;
 
     @BeforeEach
     void setUp() {
-        this.userId = 3;
+        this.userId = "5f032ca9959fb7509d16d92b";
     }
 
     @Test
@@ -69,7 +69,7 @@ public class CouponNumberRepositoryTest {
                 new CouponNumber("11", couponId),
                 new CouponNumber("22", couponId)
         );
-        allIssuedCouponNumbers.forEach(couponNumber -> couponNumber.issue(3));
+        allIssuedCouponNumbers.forEach(couponNumber -> couponNumber.issue("5f032ca9959fb7509d16d92b"));
 
         return Stream.of(
                 Arguments.of(couponId, notIssuedCouponNumbers, true),

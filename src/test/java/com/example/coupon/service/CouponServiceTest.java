@@ -29,7 +29,8 @@ import static org.mockito.BDDMockito.given;
 @ExtendWith(MockitoExtension.class)
 public class CouponServiceTest {
     private CouponService couponService;
-    private long userId;
+    private String userId;
+    private String anotherUserId;
     private long price;
     private ObjectId couponId;
     private String number;
@@ -46,7 +47,8 @@ public class CouponServiceTest {
     @BeforeEach
     void setUp() {
         this.couponService = new CouponService(couponRepository, couponNumberRepository);
-        this.userId = 1;
+        this.userId = "5f032ca9959fb7509d16d92b";
+        this.anotherUserId = "4f032ca9959fb7509d16d92a";
         this.price = 1000;
         this.couponId = new ObjectId("5f032ca9959fb7509d16d92a");
         this.number = "11";
@@ -220,7 +222,7 @@ public class CouponServiceTest {
         given(couponNumberRepository.findById(any(String.class))).willReturn(Mono.just(mockCouponNumber));
         given(couponRepository.findById(couponId)).willReturn(Mono.just(plusDayMockCoupon));
 
-        assertThatThrownBy(() -> couponService.useCoupon(number, 0).block())
+        assertThatThrownBy(() -> couponService.useCoupon(number, anotherUserId).block())
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(CouponNumber.USER_NOT_MATCH_MESSAGE);
     }
@@ -264,7 +266,7 @@ public class CouponServiceTest {
     void cancelCoupon_notMatchUserUseTest() {
         given(couponNumberRepository.findById(any(String.class))).willReturn(Mono.just(mockUsedCouponNumber));
 
-        assertThatThrownBy(() -> couponService.cancelCoupon(number, 0).block())
+        assertThatThrownBy(() -> couponService.cancelCoupon(number, anotherUserId).block())
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(CouponNumber.USER_NOT_MATCH_MESSAGE);
     }

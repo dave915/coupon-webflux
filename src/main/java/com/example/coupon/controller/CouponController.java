@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -43,23 +44,23 @@ public class CouponController {
     }
 
     @PutMapping("/{couponId}/issue")
-    public Mono<CouponNumber> issueCoupon(@PathVariable String couponId, @RequestParam long userId) {
+    public Mono<CouponNumber> issueCoupon(@PathVariable String couponId, @RequestParam String userId) {
         return couponService.issueCoupon(couponId, userId);
     }
 
     @GetMapping("/users/{userId}")
-    public Mono<List<CouponNumber>> getUserCoupons(@PathVariable long userId) {
+    public Mono<List<CouponNumber>> getUserCoupons(@PathVariable String userId) {
         return couponService.getUserCoupons(userId);
     }
 
     @PutMapping("/{couponNumberId}")
-    public Mono<CouponNumber> useCoupon(@PathVariable String couponNumberId, @RequestParam long userId) {
-        return couponService.useCoupon(couponNumberId, userId);
+    public Mono<CouponNumber> useCoupon(@PathVariable String couponNumberId, Principal principal) {
+        return couponService.useCoupon(couponNumberId, principal.getName());
     }
 
     @DeleteMapping("/{couponNumberId}")
-    public Mono<CouponNumber> cancelCoupon(@PathVariable String couponNumberId, @RequestParam long userId) {
-        return couponService.cancelCoupon(couponNumberId, userId);
+    public Mono<CouponNumber> cancelCoupon(@PathVariable String couponNumberId, Principal principal) {
+        return couponService.cancelCoupon(couponNumberId, principal.getName());
     }
 
     @GetMapping("/expired/today")
