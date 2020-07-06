@@ -8,6 +8,7 @@ import com.example.coupon.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,7 @@ public class CouponService {
 
     private final CouponRepository couponRepository;
     private final CouponNumberRepository couponNumberRepository;
+    private final ReactiveMongoTemplate reactiveMongoTemplate;
 
     public Mono<Coupon> createCoupon(Coupon coupon) {
         return couponRepository.save(coupon);
@@ -138,8 +140,12 @@ public class CouponService {
             List<CouponNumber> couponNumbers = strings.stream()
                     .map(wrapper(string -> ObjectUtils.csvRowToObject(string, fields, CouponNumber.class)))
                     .collect(Collectors.toList());
+
+
             return couponNumberRepository.saveAll(couponNumbers)
                     .then();
+//            return reactiveMongoTemplate.insertAll(couponNumbers) // bulk insert (중복 쿠폰 번호 있을시 Exception 발생)
+//                    .then();
         });
     }
 }

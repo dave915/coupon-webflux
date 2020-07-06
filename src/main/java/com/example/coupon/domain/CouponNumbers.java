@@ -1,10 +1,11 @@
 package com.example.coupon.domain;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CouponNumbers implements Iterable<CouponNumber>{
+public class CouponNumbers implements Iterable<CouponNumber> {
     private final List<CouponNumber> numbers;
 
     public CouponNumbers(List<CouponNumber> couponNumbers) {
