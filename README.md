@@ -11,6 +11,8 @@ docker run -p 27017:27017 --name mongo_boot -d mongo
 java -jar build/libs/coupon-0.0.1-SNAPSHOT.jar
 ```
 Swagger : http://localhost:8080/swagger-ui.html#/
+    - /users/sigin api로 회원 가입 한 후 swagger 상단에 Authorize 버튼을 눌러 Bearer {제공받은 JWT 토큰} 추가
+    
 ## 기능 정의
 1. 랜덤한 코드의 쿠폰을 N개 생성하여 데이터베이스에 보관하는 API를 구현하세요.
     - 쿠폰-쿠폰번호 (1:N) 형태로 구현
@@ -30,3 +32,7 @@ Swagger : http://localhost:8080/swagger-ui.html#/
     - csv파일을 한번에 다 읽어오면 메모리에 부담이 갈 수 있어 temp 파일을 생성 후 100건씩 읽어서 db에 insert 하도록 구현
     - Monogo DB는 4.0 이상부터 레플리카 구성시 트랜잭션 가능하지만, 과제 제출시 구성을 추가 할 수 없어 현재는 트랜잭션처리가 되지 않음
     - ReactiveMongoTemplate을 사용하면 bulk insert 가 되지만 upsert가 되지 않기 때문에 편의상 ReactiveMongoRepository로 구현
+9. (선택) PI 인증을 위해 JWT(Json Web Token)를 이용해서 Token 기반 API 인증 기능을 개발하고 각 API 호출 시에 HTTP Header에 발급받은 토큰을 가지고 호출하세요.
+    - signup 계정생성 API: ID, PW를 입력 받아 내부 DB에 계정을 저장하고 토큰을 생성하여 출력한다.
+        - 단, 패스워드는 안전한 방법으로 저장한다. -> SHA-256으로 저장
+    - signin 로그인 API: 입력으로 생성된 계정 (ID, PW)으로 로그인 요청하면 토큰을 발급한다.
