@@ -139,7 +139,6 @@ public class CouponService {
                     .map(wrapper(string -> ObjectUtils.csvRowToObject(string, fields, CouponNumber.class)))
                     .collect(Collectors.toList());
             return couponNumberRepository.saveAll(couponNumbers)
-                    .doOnNext(it -> couponNumbers.clear())
                     .then();
         });
     }
