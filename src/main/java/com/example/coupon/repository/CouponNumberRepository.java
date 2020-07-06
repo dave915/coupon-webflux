@@ -1,15 +1,17 @@
 package com.example.coupon.repository;
 
 import com.example.coupon.domain.CouponNumber;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface CouponNumberRepository extends CrudRepository<CouponNumber, String> {
-    Optional<CouponNumber> findFirstByCouponIdAndUserIdNull(long couponId);
+public interface CouponNumberRepository extends ReactiveMongoRepository<CouponNumber, String> {
+    Mono<CouponNumber> findFirstByCouponIdAndUserIdNull(String couponId);
 
-    List<CouponNumber> findAllByUserId(long userId);
+    Flux<CouponNumber> findAllByUserId(long userId);
 
-    List<CouponNumber> findAllByCouponIdInAndUserIdNotNull(List<Long> couponIds);
+    Flux<CouponNumber> findAllByCouponIdInAndUserIdNotNull(List<String> couponIds);
 }

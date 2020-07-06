@@ -9,7 +9,7 @@ public class CouponNumberGeneratorTest {
     @Test
     @DisplayName("n 개의 CouponNumber 를 생성 한다.")
     void generateNumbersTest() {
-        long couponId = 1;
+        String couponId = "1";
         int count = 3;
 
         CouponNumbers couponNumbers = CouponNumberGenerator.generateNumbers(couponId, count);
@@ -21,7 +21,7 @@ public class CouponNumberGeneratorTest {
     @Test
     @DisplayName("매번 다른 number를 가지는 CouponNumber 를 생성 한다.")
     void generateNumberTest() {
-       long couponId = 1;
+       String couponId = "1";
 
        CouponNumber first = CouponNumberGenerator.generateNumber(couponId);
        CouponNumber second = CouponNumberGenerator.generateNumber(couponId);

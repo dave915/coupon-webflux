@@ -7,13 +7,13 @@ import java.util.stream.IntStream;
 public class CouponNumberGenerator {
     private static final int GENERATE_START_INDEX = 0;
 
-    public static CouponNumbers generateNumbers(long couponId, int count) {
+    public static CouponNumbers generateNumbers(String couponId, int count) {
         return IntStream.range(GENERATE_START_INDEX, count)
                 .mapToObj(i -> generateNumber(couponId))
                 .collect(Collectors.collectingAndThen(Collectors.toList(), CouponNumbers::new));
     }
 
-    public static CouponNumber generateNumber(long couponId) {
+    public static CouponNumber generateNumber(String couponId) {
         String number = UUID.randomUUID().toString();
         return new CouponNumber(number, couponId);
     }

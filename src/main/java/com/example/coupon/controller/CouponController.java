@@ -37,13 +37,13 @@ public class CouponController {
     }
 
     @PostMapping("/{couponId}/generate")
-    public Mono<List<CouponNumber>> generateCouponNumber(@PathVariable long couponId,
+    public Mono<List<CouponNumber>> generateCouponNumber(@PathVariable String couponId,
                                                          @RequestParam @Min(1) int count) {
         return couponService.generateCouponNumbers(couponId, count);
     }
 
     @PutMapping("/{couponId}/issue")
-    public Mono<CouponNumber> issueCoupon(@PathVariable long couponId, @RequestParam long userId) {
+    public Mono<CouponNumber> issueCoupon(@PathVariable String couponId, @RequestParam long userId) {
         return couponService.issueCoupon(couponId, userId);
     }
 

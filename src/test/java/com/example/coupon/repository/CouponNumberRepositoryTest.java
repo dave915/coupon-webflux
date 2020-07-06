@@ -9,7 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJdbcTest
+@DataMongoTest
 @ExtendWith(SpringExtension.class)
 public class CouponNumberRepositoryTest {
     long userId;
@@ -38,12 +38,13 @@ public class CouponNumberRepositoryTest {
     @DisplayName("Batch insert를 테스트 한다.")
     void saveAllTest() {
         List<CouponNumber> couponNumbers = Arrays.asList(
-                new CouponNumber("11", 1),
-                new CouponNumber("22", 1),
-                new CouponNumber("33", 1)
+                new CouponNumber("11", "1"),
+                new CouponNumber("22", "1"),
+                new CouponNumber("33", "1")
         );
 
-        Iterable<CouponNumber> insertedCouponNumbers = couponNumberRepository.saveAll(couponNumbers);
+        Iterable<CouponNumber> insertedCouponNumbers = couponNumberRepository.saveAll(couponNumbers)
+                .collectList().block();
 
         assertThat(insertedCouponNumbers).hasSize(couponNumbers.size());
     }
@@ -51,15 +52,15 @@ public class CouponNumberRepositoryTest {
     @ParameterizedTest()
     @MethodSource(value = "findFirstByCouponIdAndUserIdNullSource")
     @DisplayName("발급되지 않은 쿠폰번호를 조회 한다")
-    void findFirstByCouponIdAndUserIdNullTest(long couponId, List<CouponNumber> couponNumbers, boolean isPresent) {
-        couponNumberRepository.saveAll(couponNumbers);
-        Optional<CouponNumber> optionalCouponNumber = couponNumberRepository.findFirstByCouponIdAndUserIdNull(couponId);
+    void findFirstByCouponIdAndUserIdNullTest(String couponId, List<CouponNumber> couponNumbers, boolean isPresent) {
+        couponNumberRepository.saveAll(couponNumbers).blockLast();
+        CouponNumber optionalCouponNumber = couponNumberRepository.findFirstByCouponIdAndUserIdNull(couponId).block();
 
-        assertThat(optionalCouponNumber.isPresent()).isEqualTo(isPresent);
+        assertThat(Optional.ofNullable(optionalCouponNumber).isPresent()).isEqualTo(isPresent);
     }
 
     static Stream<Arguments> findFirstByCouponIdAndUserIdNullSource() {
-        long couponId = 1;
+        String couponId = "1";
         List<CouponNumber> notIssuedCouponNumbers = Arrays.asList(
                 new CouponNumber("11", couponId),
                 new CouponNumber("22", couponId)
@@ -81,27 +82,30 @@ public class CouponNumberRepositoryTest {
     void findAllByUserIdTest() {
         List<CouponNumber> couponNumbers = getIssuedCouponNumbers(1);
 
-        couponNumberRepository.saveAll(couponNumbers);
-        List<CouponNumber> usersCouponNumber = couponNumberRepository.findAllByUserId(userId);
+        couponNumberRepository.saveAll(couponNumbers).blockLast();
+        List<CouponNumber> usersCouponNumber = couponNumberRepository.findAllByUserId(userId)
+                .collectList().block();
 
         assertThat(usersCouponNumber).hasSize(couponNumbers.size() - 1);
     }
 
     @Test
+    @DisplayName("CouponId로 발급되지 않은 쿠폰 번호 조회")
     void findAllByCouponIdInAndUserIdNotNullTest() {
         List<CouponNumber> issuedCouponNumbers = getIssuedCouponNumbers(0);
         List<CouponNumber> unIssuedCouponNumbers = Arrays.asList(
-                new CouponNumber("11", 1),
-                new CouponNumber("22", 2),
-                new CouponNumber("33", 3)
+                new CouponNumber("11", "1"),
+                new CouponNumber("22", "2"),
+                new CouponNumber("33", "3")
         );
         List<CouponNumber> testCouponNumbers = new ArrayList<>();
         testCouponNumbers.addAll(issuedCouponNumbers);
         testCouponNumbers.addAll(unIssuedCouponNumbers);
-        List<Long> searchCouponIds = Arrays.asList(1L, 2L);
+        List<String> searchCouponIds = Arrays.asList("1", "2");
 
-        couponNumberRepository.saveAll(testCouponNumbers);
-        List<CouponNumber> couponNumbers = couponNumberRepository.findAllByCouponIdInAndUserIdNotNull(searchCouponIds);
+        couponNumberRepository.saveAll(testCouponNumbers).blockLast();
+        List<CouponNumber> couponNumbers = couponNumberRepository.findAllByCouponIdInAndUserIdNotNull(searchCouponIds)
+                .collectList().block();
 
         assertThat(couponNumbers).hasSize(2);
         couponNumbers.forEach(couponNumber -> assertThat(couponNumber.getUserId()).isEqualTo(userId));
@@ -109,9 +113,9 @@ public class CouponNumberRepositoryTest {
 
     private List<CouponNumber> getIssuedCouponNumbers(int startIndex) {
         List<CouponNumber> couponNumbers = Arrays.asList(
-                new CouponNumber("11", 1),
-                new CouponNumber("22", 2),
-                new CouponNumber("33", 3)
+                new CouponNumber("44", "1"),
+                new CouponNumber("55", "2"),
+                new CouponNumber("66", "3")
         );
         IntStream.range(startIndex, couponNumbers.size())
                 .forEach(i -> couponNumbers.get(i).issue(userId));

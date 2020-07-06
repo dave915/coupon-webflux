@@ -1,12 +1,13 @@
 package com.example.coupon.repository;
 
 import com.example.coupon.domain.Coupon;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
@@ -15,7 +16,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJdbcTest
+@DataMongoTest
 @ExtendWith(SpringExtension.class)
 public class CouponRepositoryTest {
     private long price;
@@ -33,11 +34,15 @@ public class CouponRepositoryTest {
     void insertTest() {
         Coupon coupon = new Coupon(price, LocalDateTime.now());
 
-        long couponSize = couponRepository.count();
-        Coupon insertedCoupon = couponRepository.save(coupon);
+        long couponSize = couponRepository.count().block();
+        Coupon insertedCoupon = couponRepository.save(coupon).block();
 
-        assertThat(couponRepository.count()).isGreaterThan(couponSize);
-        assertThat(insertedCoupon.getId()).isNotNull();
+        assertThat(insertedCoupon).isNotNull();
+        assertThat(couponRepository.count().block()).isGreaterThan(couponSize);
+
+        String couponId = insertedCoupon.getId();
+        Coupon dbCoupon = couponRepository.findById(new ObjectId(couponId)).block();
+        assertThat(dbCoupon).isNotNull();
     }
 
     @Test
@@ -54,9 +59,10 @@ public class CouponRepositoryTest {
                 new Coupon(price, LocalDateTime.parse("2020-07-05T10:00:00")),
                 new Coupon(0, LocalDateTime.parse("2020-07-05T10:00:01"))
         );
-        couponRepository.saveAll(coupons);
+        couponRepository.saveAll(coupons).blockLast();
 
-        List<Coupon> expireCoupon = couponRepository.findAllByExpireDateTimeBetween(start, end);
+        List<Coupon> expireCoupon = couponRepository.findAllByExpireDateTimeBetween(start, end)
+                .collectList().block();
 
         assertThat(expireCoupon).hasSize(coupons.size() - 2);
         expireCoupon.forEach(coupon -> assertThat(coupon.getPrice()).isEqualTo(price));

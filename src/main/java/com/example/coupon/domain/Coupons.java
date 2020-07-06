@@ -10,7 +10,7 @@ public class Coupons {
         this.coupons = coupons;
     }
 
-    public List<Long> ids() {
+    public List<String> ids() {
         return coupons.stream()
                 .map(Coupon::getId)
                 .collect(Collectors.toList());

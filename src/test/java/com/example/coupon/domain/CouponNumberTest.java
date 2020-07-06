@@ -15,9 +15,9 @@ public class CouponNumberTest {
     @BeforeEach
     void setUp() {
         this.userId = 1;
-        this.couponNumber = new CouponNumber("11", 1L);
+        this.couponNumber = new CouponNumber("11", "1");
         this.couponNumber.issue(this.userId);
-        this.usedCouponNumber = new CouponNumber("11", 1L);
+        this.usedCouponNumber = new CouponNumber("11", "1");
         this.usedCouponNumber.issue(this.userId);
         this.usedCouponNumber.useCoupon(userId);
     }
