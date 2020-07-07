@@ -46,7 +46,7 @@ public class CouponNumberTest {
         couponNumber.useCoupon(userId);
 
         assertThatThrownBy(() -> couponNumber.useCoupon(userId))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(IllegalStateException.class)
                 .hasMessage(CouponNumber.IS_USED_COUPON_MESSAGE);
     }
 
@@ -72,7 +72,7 @@ public class CouponNumberTest {
         usedCouponNumber.cancelCoupon(userId);
 
         assertThatThrownBy(() -> couponNumber.cancelCoupon(userId))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(IllegalStateException.class)
                 .hasMessage(CouponNumber.IS_UN_USED_COUPON_MESSAGE);
     }
 }
