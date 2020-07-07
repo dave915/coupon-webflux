@@ -10,7 +10,7 @@ docker run -p 27017:27017 --name mongo_boot -d mongo
 ./gradlew build
 java -jar build/libs/coupon-0.0.1-SNAPSHOT.jar
 ```
-Swagger : http://localhost:8080/swagger-ui.html#/
+Swagger : http://localhost:8080/swagger-ui.html#/  
     - /users/sigin api로 회원 가입 한 후 swagger 상단에 Authorize 버튼을 눌러 Bearer {제공받은 JWT 토큰} 추가
     
 ## 기능 정의
@@ -29,6 +29,7 @@ Swagger : http://localhost:8080/swagger-ui.html#/
 7. (선택) 발급된 쿠폰중 만료 3일전 사용자에게 메세지("쿠폰이 3일 후 만료됩니다.")를 발송하는 기능을 구현하 세요. (실제 메세지를 발송하는것이 아닌 stdout 등으로 출력하시면 됩니다.)
     - 3일 후 만료되는 쿠폰을 조회 하여 해당 하는 쿠폰 번호를 조회 하여 발급받은 유저들에게 메세지 발송 로그 남김
 8. (선택) 10만개 이상 벌크 csv Import 기능 구현
+    - 프로젝트 디렉토리 root path에 샘플 파일인 coupon-service.csv(10만건) 추가
     - csv파일을 한번에 다 읽어오면 메모리에 부담이 갈 수 있어 temp 파일을 생성 후 100건씩 읽어서 db에 insert 하도록 구현
     - Monogo DB는 4.0 이상부터 레플리카 구성시 트랜잭션 가능하지만, 과제 제출시 구성을 추가 할 수 없어 현재는 트랜잭션처리가 되지 않음
     - ReactiveMongoTemplate을 사용하면 bulk insert 가 되지만 upsert가 되지 않기 때문에 편의상 ReactiveMongoRepository로 구현
