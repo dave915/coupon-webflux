@@ -47,22 +47,11 @@ public class CouponService {
                 .flatMap(coupon -> insertCouponNumbers(coupon.getId(), count));
     }
 
-    private Mono<List<CouponNumber>> insertCouponNumbers(String couponId, int count) {
-        CouponNumbers couponNumbers = CouponNumberGenerator.generateNumbers(couponId, count);
-        return couponNumberRepository.saveAll(couponNumbers)
-                .collectList();
-    }
-
     public Mono<CouponNumber> issueCoupon(String couponId, String userId) {
         return validateCouponExpired(couponId)
                 .flatMap(coupon -> couponNumberRepository.findFirstByCouponIdAndUserIdNull(coupon.getId()))
                 .switchIfEmpty(Mono.error(() -> new IllegalArgumentException(NOTFOUND_ISSUE_ABLE_COUPON_NUMBER_MESSAGE)))
                 .flatMap(couponNumber -> issueToUser(couponNumber, userId));
-    }
-
-    private Mono<CouponNumber> issueToUser(CouponNumber couponNumber, String userId) {
-        couponNumber.issue(userId);
-        return couponNumberRepository.save(couponNumber);
     }
 
     public Mono<CouponNumber> useCoupon(String couponNumberId, String userId) {
@@ -76,12 +65,6 @@ public class CouponService {
                 });
     }
 
-    private Mono<Coupon> validateCouponExpired(String couponId) {
-        return couponRepository.findById(new ObjectId(couponId))
-                .switchIfEmpty(Mono.error(() -> new IllegalArgumentException(COUPON_NOT_FOUND_MESSAGE)))
-                .doOnNext(coupon -> coupon.validExpired(LocalDateTime.now()));
-    }
-
     public Mono<CouponNumber> cancelCoupon(String couponNumberId, String userId) {
         return couponNumberRepository.findById(couponNumberId)
                 .switchIfEmpty(Mono.error(() -> new IllegalArgumentException(COUPON_NUMBER_NOT_FOUND_MESSAGE)))
@@ -91,6 +74,7 @@ public class CouponService {
                 });
     }
 
+    @Transactional(readOnly = true)
     public Mono<List<CouponNumber>> getUserCoupons(String userId) {
         return couponNumberRepository.findAllByUserId(userId)
                 .collectList();
@@ -100,12 +84,6 @@ public class CouponService {
         return couponRepository.findAllByExpireDateTimeBetween(start, end)
                 .collectList()
                 .flatMap(this::getExpiredCouponNumbers);
-    }
-
-    private Mono<List<CouponNumber>> getExpiredCouponNumbers(List<Coupon> coupons) {
-        Coupons expiredCoupons = new Coupons(coupons);
-        return couponNumberRepository.findAllByCouponIdInAndUserIdNotNull(expiredCoupons.ids())
-                .collectList();
     }
 
     public Mono<Void> noticeExpiredCouponNumberBetweenDate(LocalDateTime start, LocalDateTime end) {
@@ -119,15 +97,6 @@ public class CouponService {
         return getExpiredCouponNumbersBetweenDate(start, end)
                 .doOnNext(couponNumbers -> noticeExpiredToUser(couponNumbers, distance))
                 .then();
-    }
-
-    private void noticeExpiredToUser(List<CouponNumber> allUserCouponNumbers, int distance) {
-        allUserCouponNumbers.stream()
-                .collect(Collectors.groupingBy(CouponNumber::getUserId,
-                        Collectors.collectingAndThen(Collectors.toList(), CouponNumbers::new)))
-                .forEach((userId, couponNumbers) ->
-                        log.info("쿠폰이 {}일 후 만료 됩니다. userId >>> {}, couponNumbers >>> {}", distance, userId, couponNumbers.distinctNumbers())
-                );
     }
 
     public Mono<Void> csvUpload(Flux<FilePart> filePartFlux) {
@@ -146,5 +115,37 @@ public class CouponService {
 //            return reactiveMongoTemplate.insertAll(couponNumbers) // bulk insert (중복 쿠폰 번호 있을시 Exception 발생)
 //                    .then();
         });
+    }
+
+    private Mono<List<CouponNumber>> insertCouponNumbers(String couponId, int count) {
+        CouponNumbers couponNumbers = CouponNumberGenerator.generateNumbers(couponId, count);
+        return couponNumberRepository.saveAll(couponNumbers)
+                .collectList();
+    }
+
+    private Mono<CouponNumber> issueToUser(CouponNumber couponNumber, String userId) {
+        couponNumber.issue(userId);
+        return couponNumberRepository.save(couponNumber);
+    }
+
+    private Mono<Coupon> validateCouponExpired(String couponId) {
+        return couponRepository.findById(new ObjectId(couponId))
+                .switchIfEmpty(Mono.error(() -> new IllegalArgumentException(COUPON_NOT_FOUND_MESSAGE)))
+                .doOnNext(coupon -> coupon.validExpired(LocalDateTime.now()));
+    }
+
+    private Mono<List<CouponNumber>> getExpiredCouponNumbers(List<Coupon> coupons) {
+        Coupons expiredCoupons = new Coupons(coupons);
+        return couponNumberRepository.findAllByCouponIdInAndUserIdNotNull(expiredCoupons.ids())
+                .collectList();
+    }
+
+    private void noticeExpiredToUser(List<CouponNumber> allUserCouponNumbers, int distance) {
+        allUserCouponNumbers.stream()
+                .collect(Collectors.groupingBy(CouponNumber::getUserId,
+                        Collectors.collectingAndThen(Collectors.toList(), CouponNumbers::new)))
+                .forEach((userId, couponNumbers) ->
+                        log.info("쿠폰이 {}일 후 만료 됩니다. userId >>> {}, couponNumbers >>> {}", distance, userId, couponNumbers.distinctNumbers())
+                );
     }
 }

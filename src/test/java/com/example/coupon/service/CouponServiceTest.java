@@ -177,7 +177,7 @@ public class CouponServiceTest {
         CouponNumber couponNumber = couponService.useCoupon(number, userId).block();
 
         assertThat(couponNumber).isNotNull();
-        assertThat(couponNumber.isUseFlag()).isTrue();
+        assertThat(couponNumber.isUsed()).isTrue();
     }
 
     @Test
@@ -236,7 +236,7 @@ public class CouponServiceTest {
         CouponNumber couponNumber = couponService.cancelCoupon(number, userId).block();
 
         assertThat(couponNumber).isNotNull();
-        assertThat(couponNumber.isUseFlag()).isFalse();
+        assertThat(couponNumber.isUsed()).isFalse();
     }
 
     @Test

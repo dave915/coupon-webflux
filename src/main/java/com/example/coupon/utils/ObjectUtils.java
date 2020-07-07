@@ -1,5 +1,6 @@
 package com.example.coupon.utils;
 
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.propertyeditors.CustomBooleanEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
@@ -11,15 +12,14 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
+@UtilityClass
 public class ObjectUtils {
-    public static final String FIELD_SEPARATOR = ",";
+    public final String FIELD_SEPARATOR = ",";
     @SuppressWarnings("serial")
-    private static final Map<Class<?>, PropertyEditor> defaultEditors = new HashMap<Class<?>, PropertyEditor>() {
+    private final Map<Class<?>, PropertyEditor> defaultEditors = new HashMap<Class<?>, PropertyEditor>() {
         {
             put(boolean.class, new CustomBooleanEditor(false));
             put(Boolean.class, new CustomBooleanEditor(true));
-
-
             put(byte.class, new CustomNumberEditor(Byte.class, false));
             put(Byte.class, new CustomNumberEditor(Byte.class, true));
             put(int.class, new CustomNumberEditor(Integer.class, false));
@@ -29,7 +29,7 @@ public class ObjectUtils {
         }
     };
 
-    public static <T> T csvRowToObject(String string, List<String> fields, Class<T> tClass) throws ReflectiveOperationException {
+    public <T> T csvRowToObject(String string, List<String> fields, Class<T> tClass) throws ReflectiveOperationException {
         try {
             String[] valueString = string.split(FIELD_SEPARATOR);
             Object[] fieldValues = new Object[valueString.length];
@@ -49,7 +49,7 @@ public class ObjectUtils {
         }
     }
 
-    private static Object convertFiledValue(Field field, String valueString) {
+    private Object convertFiledValue(Field field, String valueString) {
         if (field.getType().isAssignableFrom(String.class)) {
             return valueString;
         }

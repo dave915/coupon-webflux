@@ -1,19 +1,22 @@
 package com.example.coupon.domain;
 
+import lombok.experimental.UtilityClass;
+
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@UtilityClass
 public class CouponNumberGenerator {
-    private static final int GENERATE_START_INDEX = 0;
+    private final int GENERATE_START_INDEX = 0;
 
-    public static CouponNumbers generateNumbers(String couponId, int count) {
+    public CouponNumbers generateNumbers(String couponId, int count) {
         return IntStream.range(GENERATE_START_INDEX, count)
                 .mapToObj(i -> generateNumber(couponId))
                 .collect(Collectors.collectingAndThen(Collectors.toList(), CouponNumbers::new));
     }
 
-    public static CouponNumber generateNumber(String couponId) {
+    public CouponNumber generateNumber(String couponId) {
         String number = UUID.randomUUID().toString();
         return new CouponNumber(number, couponId);
     }

@@ -16,21 +16,21 @@ public class RestControllerExceptionAdvice {
 
     @ExceptionHandler(value = {Exception.class})
     public ResponseEntity<Mono<ErrorMessage>> defaultHandler(Exception e) {
-        log.error("error >>> {}", e.getMessage(), e);
+        log.error("Exception >>> {}", e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Mono.just(new ErrorMessage(INTERNAL_SERVER_ERROR_MESSAGE)));
     }
 
     @ExceptionHandler(value = {IllegalArgumentException.class})
     public ResponseEntity<Mono<ErrorMessage>> validateExceptionHandler(IllegalArgumentException e) {
-        log.error("error >>> {}", e.getMessage(), e);
+        log.error("Illegal Exception >>> {}", e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Mono.just(new ErrorMessage(e.getMessage())));
     }
 
     @ExceptionHandler(value = {DuplicateKeyException.class})
     public ResponseEntity<Mono<ErrorMessage>> duplicateKeyExceptionHandler(Exception e) {
-        log.error("error >>> {}", e.getMessage(), e);
+        log.error("DuplicateKey Exception >>> {}", e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Mono.just(new ErrorMessage(DATA_DUPLICATE_KEY_ERROR_MESSAGE)));
     }

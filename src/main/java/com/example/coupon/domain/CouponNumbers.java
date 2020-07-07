@@ -1,23 +1,22 @@
 package com.example.coupon.domain;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class CouponNumbers implements Iterable<CouponNumber> {
-    private final List<CouponNumber> numbers;
+    private final List<CouponNumber> couponNumbers;
 
     public CouponNumbers(List<CouponNumber> couponNumbers) {
-        this.numbers = couponNumbers;
+        this.couponNumbers = couponNumbers;
     }
 
     public int size() {
-        return numbers.size();
+        return couponNumbers.size();
     }
 
     public List<String> distinctNumbers() {
-        return numbers.stream()
+        return couponNumbers.stream()
                 .map(CouponNumber::getNumber)
                 .distinct()
                 .collect(Collectors.toList());
@@ -25,6 +24,6 @@ public class CouponNumbers implements Iterable<CouponNumber> {
 
     @Override
     public Iterator<CouponNumber> iterator() {
-        return numbers.iterator();
+        return couponNumbers.iterator();
     }
 }

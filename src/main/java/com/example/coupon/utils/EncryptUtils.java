@@ -1,12 +1,14 @@
 package com.example.coupon.utils;
 
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 import java.security.MessageDigest;
 
 @Slf4j
+@UtilityClass
 public class EncryptUtils {
-    public static String encrypt(String string) {
+    public String encrypt(String string) {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
             messageDigest.reset();
@@ -19,7 +21,7 @@ public class EncryptUtils {
         }
     }
 
-    private static String byteToHexString(byte[] encodedPassword) {
+    private String byteToHexString(byte[] encodedPassword) {
         StringBuilder stringBuilder = new StringBuilder();
         for (byte b : encodedPassword) {
             if ((b & 0xff) < 0x10) {

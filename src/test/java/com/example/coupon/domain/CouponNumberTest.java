@@ -29,7 +29,7 @@ public class CouponNumberTest {
     void useCouponTest() {
         couponNumber.useCoupon(userId);
 
-        assertThat(couponNumber.isUseFlag()).isTrue();
+        assertThat(couponNumber.isUsed()).isTrue();
     }
 
     @Test
@@ -55,7 +55,7 @@ public class CouponNumberTest {
     void cancelCouponTest() {
         usedCouponNumber.cancelCoupon(userId);
 
-        assertThat(usedCouponNumber.isUseFlag()).isFalse();
+        assertThat(usedCouponNumber.isUsed()).isFalse();
     }
 
     @Test
