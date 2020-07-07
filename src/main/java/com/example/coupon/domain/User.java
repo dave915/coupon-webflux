@@ -13,7 +13,7 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "user")
-public class User {
+public class User extends AuditLog {
     @MongoId
     private ObjectId id;
     private String username;
