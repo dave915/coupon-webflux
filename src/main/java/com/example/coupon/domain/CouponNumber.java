@@ -37,7 +37,7 @@ public class CouponNumber extends AuditLog {
     public void useCoupon(String userId) {
         checkUserId(userId);
         if (used) {
-            throw new IllegalArgumentException(IS_USED_COUPON_MESSAGE);
+            throw new IllegalStateException(IS_USED_COUPON_MESSAGE);
         }
         this.used = true;
     }
@@ -45,7 +45,7 @@ public class CouponNumber extends AuditLog {
     public void cancelCoupon(String userId) {
         checkUserId(userId);
         if (!used) {
-            throw new IllegalArgumentException(IS_UN_USED_COUPON_MESSAGE);
+            throw new IllegalStateException(IS_UN_USED_COUPON_MESSAGE);
         }
         this.used = false;
     }
