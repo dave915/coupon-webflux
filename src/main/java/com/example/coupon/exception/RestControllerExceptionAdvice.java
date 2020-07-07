@@ -22,7 +22,7 @@ public class RestControllerExceptionAdvice {
     }
 
     @ExceptionHandler(value = {IllegalArgumentException.class, IllegalStateException.class})
-    public ResponseEntity<Mono<ErrorMessage>> validateExceptionHandler(IllegalArgumentException e) {
+    public ResponseEntity<Mono<ErrorMessage>> validateExceptionHandler(Exception e) {
         log.error("Illegal Exception >>> {}", e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Mono.just(new ErrorMessage(e.getMessage())));

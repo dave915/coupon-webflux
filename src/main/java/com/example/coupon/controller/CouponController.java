@@ -8,8 +8,10 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -17,6 +19,7 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -71,8 +74,11 @@ public class CouponController {
         return couponService.getExpiredCouponNumbersBetweenDate(start, end);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(dataType = "date", name = "noticeDate", required = false)
+    })
     @GetMapping("/expired/notice")
-    public Mono<Void> noticeExpiredCouponNumberBetweenDate(@RequestParam LocalDate noticeDate) {
+    public Mono<Void> noticeExpiredCouponNumberBetweenDate(@RequestParam @Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate noticeDate) {
         LocalDate date = Objects.nonNull(noticeDate) ? noticeDate : LocalDate.now().plusDays(3);
         LocalDateTime start = LocalDateTime.of(date, LocalTime.MIN);
         LocalDateTime end = LocalDateTime.of(date, LocalTime.MAX);

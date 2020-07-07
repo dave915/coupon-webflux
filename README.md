@@ -7,7 +7,7 @@ Java8, SpringBoot, Webflux, MongoDB, Gradle, Swagger
 docker run -p 27017:27017 --name mongo_boot -d mongo
 
 # application run 
-./gradlew build
+./gradlew clean build
 java -jar build/libs/coupon-0.0.1-SNAPSHOT.jar
 ```
 Swagger : http://localhost:8080/swagger-ui.html#/  
